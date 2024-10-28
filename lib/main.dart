@@ -46,111 +46,120 @@ class _WindmillChartState extends State<_WindmillChart> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            opacity: 0.7,
-            fit: BoxFit.cover,
-            image: AssetImage('assets/background.png'),
+      body: Stack(
+        children: [
+          CustomPaint(
+            size: MediaQuery.of(context).size,
+            painter: _BackgroundPainter(),
           ),
-        ),
-        child: SfCartesianChart(
-          plotAreaBorderWidth: 0,
-          primaryXAxis: const CategoryAxis(
-            majorGridLines: MajorGridLines(width: 0),
-            majorTickLines: MajorTickLines(color: Colors.white),
-            axisLine: AxisLine(color: Colors.white, width: 2),
-            labelStyle: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          primaryYAxis: NumericAxis(
-            title: const AxisTitle(text: 'Megawatts'),
-            majorGridLines: const MajorGridLines(width: 0),
-            majorTickLines: const MajorTickLines(color: Colors.white),
-            axisLine: const AxisLine(color: Colors.white, width: 2),
-            labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-            axisLabelFormatter: (AxisLabelRenderDetails args) {
-              return ChartAxisLabel('${args.text} MW', args.textStyle);
-            },
-          ),
-          tooltipBehavior: TooltipBehavior(
-            enable: true,
-            activationMode: ActivationMode.singleTap,
-            color: Colors.brown,
-            borderColor: Colors.brown,
-            borderWidth: 5,
-            builder: (dynamic data, dynamic point, dynamic series,
-                int pointIndex, int seriesIndex) {
-              return Container(
-                color: Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      SizedBox(
-                        height: 30,
-                        width: 35,
-                        child: Image.asset(_countryImages(pointIndex)),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        '${point.y.toString()}MW',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textScaler: TextScaler.noScaling,
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-          title: const ChartTitle(
-            backgroundColor: Colors.white,
-            text: ' Visualize the largest wind power producers by country ',
-            textStyle: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.brown,
-              fontSize: 20,
+          SfCartesianChart(
+            plotAreaBorderWidth: 0,
+            primaryXAxis: const CategoryAxis(
+              majorGridLines: MajorGridLines(width: 0),
+              majorTickLines: MajorTickLines(color: Colors.white),
+              axisLine: AxisLine(color: Colors.white, width: 2),
+              labelStyle: TextStyle(fontWeight: FontWeight.bold),
             ),
-          ),
-          series: <CartesianSeries<_WindEnergy, String>>[
-            ColumnSeries(
-              dataSource: _windEnergyData,
-              xValueMapper: (_WindEnergy data, int index) => data.country,
-              yValueMapper: (_WindEnergy data, int index) => data.megawatt,
-              onCreateRenderer: (ChartSeries<_WindEnergy, String> series) {
-                return _ColumnSeriesRenderer();
+            primaryYAxis: NumericAxis(
+              title: const AxisTitle(text: 'Megawatts'),
+              majorGridLines: const MajorGridLines(width: 0),
+              majorTickLines: const MajorTickLines(color: Colors.white),
+              axisLine: const AxisLine(color: Colors.white, width: 2),
+              labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+              axisLabelFormatter: (AxisLabelRenderDetails args) {
+                return ChartAxisLabel('${args.text} MW', args.textStyle);
               },
             ),
-          ],
-        ),
+            tooltipBehavior: TooltipBehavior(
+              enable: true,
+              activationMode: ActivationMode.singleTap,
+              color: Colors.brown,
+              borderColor: Colors.brown,
+              borderWidth: 5,
+              builder: (dynamic data, dynamic point, dynamic series,
+                  int pointIndex, int seriesIndex) {
+                return Container(
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        SizedBox(
+                          height: 30,
+                          width: 35,
+                          child: Image.asset(_countryImages(pointIndex)),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          '${point.y.toString()}MW',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+            title: const ChartTitle(
+              text:
+                  ' Visualize the largest top 7 wind power producers by country ',
+              textStyle: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.brown,
+                fontSize: 20,
+              ),
+              backgroundColor: Colors.white,
+            ),
+            series: <CartesianSeries<_WindEnergy, String>>[
+              ColumnSeries(
+                dataSource: _windEnergyData,
+                xValueMapper: (_WindEnergy data, int index) => data.country,
+                yValueMapper: (_WindEnergy data, int index) => data.megawatt,
+                animationDuration: 0,
+                onCreateRenderer: (ChartSeries<_WindEnergy, String> series) {
+                  return _ColumnSeriesRenderer();
+                },
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
   String _countryImages(int pointIndex) {
-    return pointIndex == 0
-        ? 'assets/brazil.png'
-        : pointIndex == 1
-            ? 'assets/uk.png'
-            : pointIndex == 2
-                ? 'assets/spain.png'
-                : pointIndex == 3
-                    ? 'assets/india.png'
-                    : pointIndex == 4
-                        ? 'assets/germany.png'
-                        : pointIndex == 5
-                            ? 'assets/us.png'
-                            : 'assets/china.png';
+    switch (pointIndex) {
+      case 0:
+        return 'assets/brazil.png';
+      case 1:
+        return 'assets/uk.png';
+      case 2:
+        return 'assets/spain.png';
+      case 3:
+        return 'assets/india.png';
+      case 4:
+        return 'assets/germany.png';
+      case 5:
+        return 'assets/us.png';
+      case 6:
+        return 'assets/china.png';
+    }
+    return '';
+  }
+
+  @override
+  void dispose() {
+    _windEnergyData.clear();
+    super.dispose();
   }
 }
 
-// Model class to hold stock data
 class _WindEnergy {
   _WindEnergy(this.country, this.megawatt);
   final String country;
@@ -165,103 +174,155 @@ class _ColumnSeriesRenderer extends ColumnSeriesRenderer<_WindEnergy, String> {
 
 // Custom segment class to draw custom shapes.
 class _ColumnSegment extends ColumnSegment<_WindEnergy, String> {
-  Path bladesPath = Path();
+  final Path _bladesPath = Path();
+  Path _postPath = Path();
 
-  // Check if the position is within the drawn shapes.
-  @override
-  bool contains(Offset position) {
-    return (segmentRect != null && segmentRect!.contains(position)) ||
-        bladesPath.contains(position);
+  void _reset() {
+    _bladesPath.reset();
+    _postPath.reset();
   }
 
-  // Custom painting method for drawing .
+  @override
+  bool contains(Offset position) {
+    return _postPath.contains(position) || _bladesPath.contains(position);
+  }
+
   @override
   void onPaint(Canvas canvas) {
-    bladesPath.reset();
-
-    // Return if segmentRect is null.
+    _reset();
     if (segmentRect == null) {
       return;
     }
 
-    // Paint settings for the blades and the post.
-    Paint bladeFillPaint = Paint()
+    final Paint bladeFillPaint = Paint()
       ..color = Colors.brown
       ..style = PaintingStyle.fill;
-
-    Paint postFillPaint = Paint()
-      ..color = Colors.brown
-      ..style = PaintingStyle.fill;
-
     final Paint bladeStrokePaint = Paint()
       ..color = Colors.white
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
 
-    final Paint postStrokePaint = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
+    final Paint postFillPaint = bladeFillPaint;
+    final Paint postStrokePaint = bladeStrokePaint;
 
-    double centerX = segmentRect!.center.dx;
-    double centerY = segmentRect!.top;
+    final double bottom = segmentRect!.bottom;
+    final double top = segmentRect!.top;
+    final double centerX = segmentRect!.center.dx;
+    final double centerY = top;
+    final double postBaseWidth = segmentRect!.width * 0.2;
+    final double postTopWidth = segmentRect!.width * 0.05;
+    final double halfPostBaseWidth = postBaseWidth / 2;
+    final double halfPostTopWidth = postTopWidth / 2;
 
-    // Post dimensions for the windmill post.
-    double postBaseWidth = segmentRect!.width * 0.2;
-    double postTopWidth = segmentRect!.width * 0.05;
+    _postPath = Path()
+      ..moveTo(centerX - halfPostBaseWidth, bottom)
+      ..lineTo(centerX + halfPostBaseWidth, bottom)
+      ..lineTo(centerX + halfPostTopWidth, top)
+      ..lineTo(centerX - halfPostTopWidth, top)
+      ..close();
 
-    // Define the path for the windmill post.
-    Path postPath = Path()
-      ..moveTo(centerX - postBaseWidth / 2, segmentRect!.bottom) // Bottom left.
-      ..lineTo(centerX + postBaseWidth / 2, segmentRect!.bottom) // Bottom right
-      ..lineTo(centerX + postTopWidth / 2, segmentRect!.top) // Top right.
-      ..lineTo(centerX - postTopWidth / 2, segmentRect!.top) // Top left.
-      ..close(); // Close the path
+    canvas.drawPath(_postPath, postFillPaint);
+    canvas.drawPath(_postPath, postStrokePaint);
 
-    // Draw the windmill post.
-    canvas.drawPath(postPath, postFillPaint);
-    canvas.drawPath(postPath, postStrokePaint);
-
-    // Blade dimensions
     double bladeLength =
         10 * (currentSegmentIndex < 3 ? 3 : currentSegmentIndex.toDouble());
     double bladeWidth = 20;
 
-    // Loop to draw three curved blades.
-    for (int i = 0; i < 3; i++) {
-      double angle = (i * 120) * pi / 180;
+    // Define the angles for the three blades in radians.
+    double angle1 = 0;
+    double angle2 = 120 * pi / 180;
+    double angle3 = 240 * pi / 180;
 
-      // Transformation for positioning and rotating blades.
-      Matrix4 transformMatrix = Matrix4.identity()
-        ..translate(centerX, centerY)
-        ..rotateZ(angle);
+    // Draw first blade.
+    _drawBlade(canvas, bladeLength, bladeWidth, centerX, centerY, angle1,
+        bladeFillPaint, bladeStrokePaint);
 
-      // Define the blade path using cubic curves.
-      Path bladePath = Path()
-        ..moveTo(0, 0) // Start at the center.
-        ..cubicTo(bladeWidth / 4, -bladeLength, bladeWidth / 2, -bladeLength, 0,
-            -bladeLength) // Right curve.
-        ..cubicTo(-bladeWidth / 4, -bladeLength, -bladeWidth / 2, -bladeLength,
-            0, 0); // Left curve
+    // Draw second blade.
+    _drawBlade(canvas, bladeLength, bladeWidth, centerX, centerY, angle2,
+        bladeFillPaint, bladeStrokePaint);
 
-      // Add each blade to the combined path.
-      bladesPath.addPath(bladePath, Offset.zero,
-          matrix4: transformMatrix.storage);
-    }
+    // Draw third blade.
+    _drawBlade(canvas, bladeLength, bladeWidth, centerX, centerY, angle3,
+        bladeFillPaint, bladeStrokePaint);
 
-    // Draw the blades on the canvas.
-    canvas.drawPath(bladesPath, bladeFillPaint);
-    canvas.drawPath(bladesPath, bladeStrokePaint);
-
-    // Draw the center circle of the windmill.
+    // Draws circle at the center of the windmill.
     canvas.drawCircle(
         Offset(centerX, centerY), 5, Paint()..color = Colors.white);
   }
 
-  // Cleanup the path resources.
+  // Helper method to draw each blade
+  void _drawBlade(
+      Canvas canvas,
+      double bladeLength,
+      double bladeWidth,
+      double centerX,
+      double centerY,
+      double angle,
+      Paint fillPaint,
+      Paint strokePaint) {
+    Matrix4 transformMatrix = Matrix4.identity()
+      ..translate(centerX, centerY)
+      ..rotateZ(angle);
+
+    Path bladePath = Path()
+      ..moveTo(0, 0)
+      ..cubicTo(bladeWidth / 4, -bladeLength, bladeWidth / 2, -bladeLength, 0,
+          -bladeLength)
+      ..cubicTo(
+          -bladeWidth / 4, -bladeLength, -bladeWidth / 2, -bladeLength, 0, 0);
+
+    _bladesPath.addPath(bladePath, Offset.zero,
+        matrix4: transformMatrix.storage);
+
+    // Draw the blade on the canvas
+    canvas.drawPath(_bladesPath, fillPaint);
+    canvas.drawPath(_bladesPath, strokePaint);
+  }
+
   @override
   void dispose() {
-    bladesPath.reset();
+    _reset();
     super.dispose();
   }
+}
+
+class _BackgroundPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double width = size.width;
+    final double height = size.height;
+    final Rect backgroundRect = Rect.fromLTWH(0, 0, width, height);
+    final Paint sunPaint = Paint()..color = Colors.yellow;
+    final Paint skyPaint = Paint()
+      ..shader = const LinearGradient(
+        colors: [
+          Colors.orange,
+          Color.fromARGB(255, 90, 190, 236),
+          Colors.lightGreen,
+        ],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+      ).createShader(backgroundRect);
+
+    canvas.drawRect(backgroundRect, skyPaint);
+    canvas.drawCircle(Offset(width * 0.8, height * 0.2), 60, sunPaint);
+    _drawCloud(canvas, Offset(width * 0.3, height * 0.3));
+    _drawCloud(canvas, Offset(width * 0.6, height * 0.4));
+  }
+
+  void _drawCloud(Canvas canvas, Offset position) {
+    final Paint cloudPaint = Paint()..color = Colors.white;
+    _drawOval(canvas, position.translate(-40, 10), 70, 40, cloudPaint);
+    _drawOval(canvas, position.translate(40, 10), 70, 40, cloudPaint);
+    _drawOval(canvas, position, 100, 60, cloudPaint);
+  }
+
+  void _drawOval(Canvas canvas, Offset position, double width, double height,
+      Paint paint) {
+    canvas.drawOval(
+        Rect.fromCenter(center: position, width: width, height: height), paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
