@@ -123,7 +123,7 @@ class _WindmillChartState extends State<_WindmillChart> {
                 yValueMapper: (_WindEnergy data, int index) => data.megawatt,
                 animationDuration: 0,
                 onCreateRenderer: (ChartSeries<_WindEnergy, String> series) {
-                  return _ColumnSeriesRenderer();
+                  return _CustomColumnSeriesRenderer();
                 },
               ),
             ],
@@ -167,7 +167,8 @@ class _WindEnergy {
 }
 
 // Custom renderer for column series
-class _ColumnSeriesRenderer extends ColumnSeriesRenderer<_WindEnergy, String> {
+class _CustomColumnSeriesRenderer
+    extends ColumnSeriesRenderer<_WindEnergy, String> {
   @override
   ColumnSegment<_WindEnergy, String> createSegment() => _ColumnSegment();
 }
@@ -224,9 +225,10 @@ class _ColumnSegment extends ColumnSegment<_WindEnergy, String> {
     canvas.drawPath(_postPath, postFillPaint);
     canvas.drawPath(_postPath, postStrokePaint);
 
+    final Offset center = Offset(centerX, centerY);
+    double bladeWidth = 20;
     double bladeLength =
         10 * (currentSegmentIndex < 3 ? 3 : currentSegmentIndex.toDouble());
-    double bladeWidth = 20;
 
     // Define the angles for the three blades in radians.
     double angle1 = 0;
@@ -234,42 +236,42 @@ class _ColumnSegment extends ColumnSegment<_WindEnergy, String> {
     double angle3 = 240 * pi / 180;
 
     // Draw first blade.
-    _drawBlade(canvas, bladeLength, bladeWidth, centerX, centerY, angle1,
-        bladeFillPaint, bladeStrokePaint);
+    _drawBlade(canvas, center, angle1, bladeLength, bladeWidth, bladeFillPaint,
+        bladeStrokePaint);
 
     // Draw second blade.
-    _drawBlade(canvas, bladeLength, bladeWidth, centerX, centerY, angle2,
-        bladeFillPaint, bladeStrokePaint);
+    _drawBlade(canvas, center, angle2, bladeLength, bladeWidth, bladeFillPaint,
+        bladeStrokePaint);
 
     // Draw third blade.
-    _drawBlade(canvas, bladeLength, bladeWidth, centerX, centerY, angle3,
-        bladeFillPaint, bladeStrokePaint);
+    _drawBlade(canvas, center, angle3, bladeLength, bladeWidth, bladeFillPaint,
+        bladeStrokePaint);
 
     // Draws circle at the center of the windmill.
-    canvas.drawCircle(
-        Offset(centerX, centerY), 5, Paint()..color = Colors.white);
+    canvas.drawCircle(center, 5, Paint()..color = Colors.white);
   }
 
   // Helper method to draw each blade
   void _drawBlade(
-      Canvas canvas,
-      double bladeLength,
-      double bladeWidth,
-      double centerX,
-      double centerY,
-      double angle,
-      Paint fillPaint,
-      Paint strokePaint) {
+    Canvas canvas,
+    Offset center,
+    double angle,
+    double bladeLength,
+    double bladeWidth,
+    Paint fillPaint,
+    Paint strokePaint,
+  ) {
     Matrix4 transformMatrix = Matrix4.identity()
-      ..translate(centerX, centerY)
+      ..translate(center.dx, center.dy)
       ..rotateZ(angle);
 
-    Path bladePath = Path()
+    final double halfWidth = bladeWidth / 2;
+    final double quarterWidth = bladeWidth / 4;
+    final Path bladePath = Path()
       ..moveTo(0, 0)
-      ..cubicTo(bladeWidth / 4, -bladeLength, bladeWidth / 2, -bladeLength, 0,
-          -bladeLength)
       ..cubicTo(
-          -bladeWidth / 4, -bladeLength, -bladeWidth / 2, -bladeLength, 0, 0);
+          quarterWidth, -bladeLength, halfWidth, -bladeLength, 0, -bladeLength)
+      ..cubicTo(-quarterWidth, -bladeLength, -halfWidth, -bladeLength, 0, 0);
 
     _bladesPath.addPath(bladePath, Offset.zero,
         matrix4: transformMatrix.storage);
