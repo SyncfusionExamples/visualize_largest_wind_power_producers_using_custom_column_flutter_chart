@@ -32,13 +32,13 @@ class _WindmillChartState extends State<_WindmillChart> {
   @override
   void initState() {
     _windEnergyData = [
-      _WindEnergy('Brazil', 29135),
-      _WindEnergy('United Kingdom', 30215),
-      _WindEnergy('Spain', 31028),
-      _WindEnergy('India', 44736),
-      _WindEnergy('Germany', 69459),
-      _WindEnergy('US', 148020),
-      _WindEnergy('China', 441895),
+      _WindEnergy('China', 441895, '+19.1%'),
+      _WindEnergy('US', 148020, '+9.4%'),
+      _WindEnergy('Germany', 69459, '+7.6%'),
+      _WindEnergy('India', 44736, '+9.3%'),
+      _WindEnergy('Spain', 31028, '+3.1%'),
+      _WindEnergy('United Kingdom', 30215, '+10.4%'),
+      _WindEnergy('Brazil', 29135, '+29.5%'),
     ];
     super.initState();
   }
@@ -46,89 +46,132 @@ class _WindmillChartState extends State<_WindmillChart> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          CustomPaint(
-            size: MediaQuery.of(context).size,
-            painter: _BackgroundPainter(),
-          ),
-          SfCartesianChart(
-            plotAreaBorderWidth: 0,
-            primaryXAxis: const CategoryAxis(
-              majorGridLines: MajorGridLines(width: 0),
-              majorTickLines: MajorTickLines(color: Colors.white),
-              axisLine: AxisLine(color: Colors.white, width: 2),
-              labelStyle: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            primaryYAxis: NumericAxis(
-              title: const AxisTitle(text: 'Megawatts'),
-              majorGridLines: const MajorGridLines(width: 0),
-              majorTickLines: const MajorTickLines(color: Colors.white),
-              axisLine: const AxisLine(color: Colors.white, width: 2),
-              labelStyle: const TextStyle(fontWeight: FontWeight.bold),
-              axisLabelFormatter: (AxisLabelRenderDetails args) {
-                return ChartAxisLabel('${args.text} MW', args.textStyle);
-              },
-            ),
-            tooltipBehavior: TooltipBehavior(
-              enable: true,
-              activationMode: ActivationMode.singleTap,
-              color: Colors.brown,
-              borderColor: Colors.brown,
-              borderWidth: 5,
-              builder: (dynamic data, dynamic point, dynamic series,
-                  int pointIndex, int seriesIndex) {
-                return Container(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        SizedBox(
-                          height: 30,
-                          width: 35,
-                          child: Image.asset(_countryImages(pointIndex)),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          '${point.y.toString()}MW',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-            title: const ChartTitle(
-              text:
-                  ' Visualize the largest top 7 wind power producers by country ',
-              textStyle: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.brown,
-                fontSize: 20,
-              ),
-              backgroundColor: Colors.white,
-            ),
-            series: <CartesianSeries<_WindEnergy, String>>[
-              ColumnSeries(
-                dataSource: _windEnergyData,
-                xValueMapper: (_WindEnergy data, int index) => data.country,
-                yValueMapper: (_WindEnergy data, int index) => data.megawatt,
-                animationDuration: 0,
-                onCreateRenderer: (ChartSeries<_WindEnergy, String> series) {
-                  return _CustomColumnSeriesRenderer();
-                },
-              ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color.fromARGB(255, 236, 207, 165),
+              Color.fromARGB(255, 159, 217, 244),
+              Color.fromARGB(255, 204, 238, 165),
             ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-        ],
+        ),
+        child: SfCartesianChart(
+          plotAreaBorderWidth: 0,
+          title: const ChartTitle(
+            text:
+                ' Visualize the largest top 7 wind power producers by country ',
+            textStyle: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.brown,
+              fontSize: 20,
+            ),
+          ),
+          primaryXAxis: const CategoryAxis(
+            title: AxisTitle(
+              text: 'Wind Energy Producers by Country',
+              textStyle: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            majorGridLines: MajorGridLines(width: 0),
+            majorTickLines: MajorTickLines(color: Colors.brown),
+            axisLine: AxisLine(color: Colors.brown, width: 2),
+            labelStyle: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          primaryYAxis: NumericAxis(
+            title: const AxisTitle(
+              text: 'Wind Energy Capacity (Megawatts)',
+              textStyle: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            majorTickLines: const MajorTickLines(color: Colors.brown),
+            axisLine: const AxisLine(color: Colors.brown, width: 2),
+            labelStyle: const TextStyle(fontWeight: FontWeight.bold),
+            axisLabelFormatter: (AxisLabelRenderDetails args) {
+              double value = double.tryParse(args.text) ?? 0;
+              String formattedText = _formatNumber(value);
+              return ChartAxisLabel(formattedText, args.textStyle);
+            },
+          ),
+          series: <CartesianSeries<_WindEnergy, String>>[
+            ColumnSeries(
+              dataSource: _windEnergyData,
+              xValueMapper: (_WindEnergy data, int index) => data.country,
+              yValueMapper: (_WindEnergy data, int index) => data.megawatt,
+              animationDuration: 0,
+              onCreateRenderer: (ChartSeries<_WindEnergy, String> series) {
+                return _CustomColumnSeriesRenderer();
+              },
+            ),
+          ],
+          tooltipBehavior: TooltipBehavior(
+            enable: true,
+            activationMode: ActivationMode.singleTap,
+            color: Colors.brown,
+            builder: (dynamic data, dynamic point, dynamic series,
+                int pointIndex, int seriesIndex) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          SizedBox(
+                            height: 30,
+                            width: 35,
+                            child: Image.asset(_countryImages(pointIndex)),
+                          ),
+                          const SizedBox(width: 30),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Text(
+                            '${data.country}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            'Megawatts: ${point.y.toString()}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            'ANNUAL GROWTH RATE\n(2013-2023) ${data.rate}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -153,6 +196,19 @@ class _WindmillChartState extends State<_WindmillChart> {
     return '';
   }
 
+  // Function to format numbers to a more readable form
+  String _formatNumber(double num) {
+    // Special case for zero to avoid decimal representation
+    if (num == 0) {
+      return '0';
+    }
+    if (num >= 1000) {
+      return '${(num / 1000).toStringAsFixed(num >= 10000 ? 0 : 1)}K';
+    }
+    return num.toStringAsFixed(
+        num == num.toInt() ? 0 : 1); // Remove ".0" for whole numbers
+  }
+
   @override
   void dispose() {
     _windEnergyData.clear();
@@ -161,9 +217,10 @@ class _WindmillChartState extends State<_WindmillChart> {
 }
 
 class _WindEnergy {
-  _WindEnergy(this.country, this.megawatt);
+  _WindEnergy(this.country, this.megawatt, this.rate);
   final String country;
   final double megawatt;
+  final String rate;
 }
 
 // Custom renderer for column series
@@ -195,16 +252,13 @@ class _ColumnSegment extends ColumnSegment<_WindEnergy, String> {
       return;
     }
 
-    final Paint bladeFillPaint = Paint()
+    final Paint fillPaint = Paint()
       ..color = Colors.brown
       ..style = PaintingStyle.fill;
-    final Paint bladeStrokePaint = Paint()
+    final Paint strokePaint = Paint()
       ..color = Colors.white
       ..strokeWidth = 2
       ..style = PaintingStyle.stroke;
-
-    final Paint postFillPaint = bladeFillPaint;
-    final Paint postStrokePaint = bladeStrokePaint;
 
     final double bottom = segmentRect!.bottom;
     final double top = segmentRect!.top;
@@ -222,13 +276,39 @@ class _ColumnSegment extends ColumnSegment<_WindEnergy, String> {
       ..lineTo(centerX - halfPostTopWidth, top)
       ..close();
 
-    canvas.drawPath(_postPath, postFillPaint);
-    canvas.drawPath(_postPath, postStrokePaint);
+    canvas.drawPath(_postPath, fillPaint);
+    canvas.drawPath(_postPath, strokePaint);
+
+    // Maintained a minimum value of 30 and a maximum value of 40 as the default
+    // blade length range. Using the column segment value, I calculate the blade
+    // length by normalizing it within this range. The formula maps the value to
+    // a specified blade length range, ensuring proportional scaling.
+    // This approach dynamically adjusts blade sizes based on the segment value.
+
+    // Constants for blade length range.
+    const double minBladeLength = 30;
+    const double maxBladeLength = 40;
+
+    // Constants for data normalization.
+    const double minValue = 29135;
+    const double maxValue = 441895;
+
+    // Calculate the normalized value of the segment (based on y).
+    const double lengthRange = maxBladeLength - minBladeLength;
+    final double normalizedFactor = (y - minValue) / (maxValue - minValue);
+
+    // Adjust blade length dynamically based on the reversed segment index.
+    final double reverseScalingFactor =
+        1 - (currentSegmentIndex * 0.1); // Decrease as segment index increases.
+
+    double bladeLength = normalizedFactor * lengthRange + minBladeLength;
+    bladeLength *= reverseScalingFactor; // Apply reverse scaling factor
+
+    // Ensure the blade length doesn't drop below the minimum value.
+    bladeLength = bladeLength.clamp(minBladeLength, maxBladeLength);
 
     final Offset center = Offset(centerX, centerY);
-    double bladeWidth = 20;
-    double bladeLength =
-        10 * (currentSegmentIndex < 3 ? 3 : currentSegmentIndex.toDouble());
+    const double bladeWidth = 20;
 
     // Define the angles for the three blades in radians.
     double angle1 = 0;
@@ -236,19 +316,19 @@ class _ColumnSegment extends ColumnSegment<_WindEnergy, String> {
     double angle3 = 240 * pi / 180;
 
     // Draw first blade.
-    _drawBlade(canvas, center, angle1, bladeLength, bladeWidth, bladeFillPaint,
-        bladeStrokePaint);
+    _drawBlade(canvas, center, angle1, bladeLength, bladeWidth, fillPaint,
+        strokePaint);
 
     // Draw second blade.
-    _drawBlade(canvas, center, angle2, bladeLength, bladeWidth, bladeFillPaint,
-        bladeStrokePaint);
+    _drawBlade(canvas, center, angle2, bladeLength, bladeWidth, fillPaint,
+        strokePaint);
 
     // Draw third blade.
-    _drawBlade(canvas, center, angle3, bladeLength, bladeWidth, bladeFillPaint,
-        bladeStrokePaint);
+    _drawBlade(canvas, center, angle3, bladeLength, bladeWidth, fillPaint,
+        strokePaint);
 
     // Draws circle at the center of the windmill.
-    canvas.drawCircle(center, 5, Paint()..color = Colors.white);
+    canvas.drawCircle(center, 5, Paint()..color = Colors.brown);
   }
 
   // Helper method to draw each blade
@@ -286,45 +366,4 @@ class _ColumnSegment extends ColumnSegment<_WindEnergy, String> {
     _reset();
     super.dispose();
   }
-}
-
-class _BackgroundPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double width = size.width;
-    final double height = size.height;
-    final Rect backgroundRect = Rect.fromLTWH(0, 0, width, height);
-    final Paint sunPaint = Paint()..color = Colors.yellow;
-    final Paint skyPaint = Paint()
-      ..shader = const LinearGradient(
-        colors: [
-          Colors.orange,
-          Color.fromARGB(255, 90, 190, 236),
-          Colors.lightGreen,
-        ],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-      ).createShader(backgroundRect);
-
-    canvas.drawRect(backgroundRect, skyPaint);
-    canvas.drawCircle(Offset(width * 0.8, height * 0.2), 60, sunPaint);
-    _drawCloud(canvas, Offset(width * 0.3, height * 0.3));
-    _drawCloud(canvas, Offset(width * 0.6, height * 0.4));
-  }
-
-  void _drawCloud(Canvas canvas, Offset position) {
-    final Paint cloudPaint = Paint()..color = Colors.white;
-    _drawOval(canvas, position.translate(-40, 10), 70, 40, cloudPaint);
-    _drawOval(canvas, position.translate(40, 10), 70, 40, cloudPaint);
-    _drawOval(canvas, position, 100, 60, cloudPaint);
-  }
-
-  void _drawOval(Canvas canvas, Offset position, double width, double height,
-      Paint paint) {
-    canvas.drawOval(
-        Rect.fromCenter(center: position, width: width, height: height), paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
