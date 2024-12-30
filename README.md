@@ -1,6 +1,8 @@
-# Wind_mill_chart
+# How to visualize the largest wind power producers by country by using the Flutter Column Chart
 
 This repository contains a sample that demonstrates the array of options for how to visualize the largest wind power producers by country by using the Flutter Column Chart in Syncfusion Charts package.
+
+Please refer to the blog through this [link](https://www.syncfusion.com/blogs/post/flutter-column-chart-wind-power-producer).
 
 ## Syncfusion controls:
 
